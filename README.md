@@ -63,6 +63,19 @@ This project adopts a modern decoupled architecture, separating the client inter
 
 ---
 
+## ☁️ Deploy this Frontend Repo on Vercel
+
+When you move `frontend/` into its own repository:
+
+- Vercel does **not** require Docker for this Vite app.
+- Framework preset: `Vite`
+- Build command: `npm run build`
+- Output directory: `dist`
+
+You can keep the Dockerfile for local Docker usage, but Vercel deployment should use normal build settings.
+
+---
+
 ## 🚀 Running the Project
 
 ### 1. Using Docker (Recommended)

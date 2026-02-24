@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { cn } from '@/lib/utils';
 import { useLanguageStore } from '@/store/languageStore';
+import api from '@/config/api';
 
 interface HoroscopeData {
     date: string;
@@ -33,7 +33,6 @@ export interface ZodiacSign {
 }
 
 export function HoroscopeWidget({ className, selectedSign }: { className?: string, selectedSign: ZodiacSign }) {
-    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
     const { t, language } = useLanguageStore();
     const [selectedPeriod, setSelectedPeriod] = useState<Period>('daily');
     const [horoscope, setHoroscope] = useState<HoroscopeData | null>(null);
@@ -46,7 +45,7 @@ export function HoroscopeWidget({ className, selectedSign }: { className?: strin
 
         try {
             const langQuery = language === 'hi' ? '?lang=hi' : '';
-            const response = await axios.get(`${apiBaseUrl}/astrology/horoscope/${period}/${sign.toLowerCase()}${langQuery}`);
+            const response = await api.get(`/astrology/horoscope/${period}/${sign.toLowerCase()}${langQuery}`);
             if (response.data) {
                 setHoroscope(response.data);
             } else {

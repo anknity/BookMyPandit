@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
 import { cn } from '@/lib/utils';
 import { useLanguageStore } from '@/store/languageStore';
 import ReactMarkdown from 'react-markdown';
+import api from '@/config/api';
 
 interface ChatMessage {
     role: 'user' | 'assistant';
@@ -10,7 +10,6 @@ interface ChatMessage {
 }
 
 export function AIChatbot() {
-    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
@@ -48,7 +47,7 @@ export function AIChatbot() {
         setIsLoading(true);
 
         try {
-            const response = await axios.post(`${apiBaseUrl}/astrology/chat`, {
+            const response = await api.post('/astrology/chat', {
                 message: userMessage,
                 history: messages // pass previous conversation history to AI context
             });

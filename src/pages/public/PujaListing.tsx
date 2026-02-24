@@ -4,9 +4,9 @@ import { Puja } from '@/types';
 import { PujaCard } from '@/components/user/PujaCard';
 import { cn } from '@/lib/utils';
 import { useLocation } from 'react-router-dom';
+import api from '@/config/api';
 
 export default function PujaListing() {
-    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
     const { t, language } = useLanguageStore();
     const [pujas, setPujas] = useState<Puja[]>([]);
     const [loading, setLoading] = useState(true);
@@ -37,8 +37,8 @@ export default function PujaListing() {
         try {
             setLoading(true);
             // Fetch from API
-            const response = await fetch(`${apiBaseUrl}/pujas`);
-            const data = await response.json();
+            const response = await api.get('/pujas');
+            const data = response.data;
             if (data.pujas) {
                 setPujas(data.pujas);
             }

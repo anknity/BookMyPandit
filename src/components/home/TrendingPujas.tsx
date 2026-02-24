@@ -1,17 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Puja } from '@/types';
 import { PujaCard } from '@/components/user/PujaCard';
+import api from '@/config/api';
 
 export function TrendingPujas() {
-    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
     const [pujas, setPujas] = useState<Puja[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchPujas = async () => {
             try {
-                const response = await fetch(`${apiBaseUrl}/pujas?limit=4`);
-                const data = await response.json();
+                const response = await api.get('/pujas?limit=4');
+                const data = response.data;
                 setPujas(data.pujas || []);
             } catch (error) {
                 console.error("Failed to fetch trending pujas", error);

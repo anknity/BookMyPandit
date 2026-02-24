@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/lib/utils';
 import { BookingCard } from '@/components/user/BookingCard';
@@ -39,7 +38,6 @@ interface PanditData {
 }
 
 export function HomePage() {
-  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
   const { user } = useAuthStore();
   const [muhurats, setMuhurats] = useState<Muhurat[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -74,7 +72,7 @@ export function HomePage() {
 
   // Fetch banner
   useEffect(() => {
-    axios.get(`${apiBaseUrl}/banner`)
+    api.get('/banner')
       .then(res => {
         if (res.data?.banner?.is_active !== false) {
           setBanner({ ...DEFAULT_BANNER, ...res.data.banner });
@@ -109,7 +107,7 @@ export function HomePage() {
   useEffect(() => {
     const fetchMuhurats = async () => {
       try {
-        const res = await axios.get(`${apiBaseUrl}/astrology/muhurat`);
+        const res = await api.get('/astrology/muhurat');
         if (res.data.success) {
           setMuhurats(res.data.data.muhurats);
         }

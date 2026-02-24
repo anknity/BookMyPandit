@@ -7,9 +7,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+node_modules/
+build/
+dist/
+dist-ssr/
+coverage/
 *.local
 
 # Editor directories and files
@@ -26,4 +28,12 @@ dist-ssr
 # env files
 .env
 .env.*
+.env*
 !.env.example
+
+# Custom Project Logs
+ts-errors.txt
+build-output.txt
+lint_errors.txt
+lint_output.txt
+errors.txt

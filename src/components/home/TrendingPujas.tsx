@@ -3,13 +3,14 @@ import { Puja } from '@/types';
 import { PujaCard } from '@/components/user/PujaCard';
 
 export function TrendingPujas() {
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
     const [pujas, setPujas] = useState<Puja[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchPujas = async () => {
             try {
-                const response = await fetch(`${import.meta.env.VITE_API_URL}/pujas?limit=4`);
+                const response = await fetch(`${apiBaseUrl}/pujas?limit=4`);
                 const data = await response.json();
                 setPujas(data.pujas || []);
             } catch (error) {

@@ -10,6 +10,7 @@ interface ChatMessage {
 }
 
 export function AIChatbot() {
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
@@ -47,7 +48,7 @@ export function AIChatbot() {
         setIsLoading(true);
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/astrology/chat`, {
+            const response = await axios.post(`${apiBaseUrl}/astrology/chat`, {
                 message: userMessage,
                 history: messages // pass previous conversation history to AI context
             });

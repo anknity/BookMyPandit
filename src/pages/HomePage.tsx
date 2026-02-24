@@ -39,6 +39,7 @@ interface PanditData {
 }
 
 export function HomePage() {
+  const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
   const { user } = useAuthStore();
   const [muhurats, setMuhurats] = useState<Muhurat[]>([]);
   const [stats, setStats] = useState<UserStats | null>(null);
@@ -73,7 +74,7 @@ export function HomePage() {
 
   // Fetch banner
   useEffect(() => {
-    axios.get(`${import.meta.env.VITE_API_URL}/banner`)
+    axios.get(`${apiBaseUrl}/banner`)
       .then(res => {
         if (res.data?.banner?.is_active !== false) {
           setBanner({ ...DEFAULT_BANNER, ...res.data.banner });
@@ -108,7 +109,7 @@ export function HomePage() {
   useEffect(() => {
     const fetchMuhurats = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/astrology/muhurat`);
+        const res = await axios.get(`${apiBaseUrl}/astrology/muhurat`);
         if (res.data.success) {
           setMuhurats(res.data.data.muhurats);
         }

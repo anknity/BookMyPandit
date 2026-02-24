@@ -12,6 +12,7 @@ interface TarotData {
 }
 
 export function TarotWidget({ className }: { className?: string }) {
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
     const { t } = useLanguageStore();
     const [cardData, setCardData] = useState<TarotData[]>([]);
     const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ export function TarotWidget({ className }: { className?: string }) {
         const fetchTarot = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/astrology/tarot/daily`);
+                const response = await axios.get(`${apiBaseUrl}/astrology/tarot/daily`);
                 if (response.data.success) {
                     setCardData(response.data.data);
                 }

@@ -12,6 +12,7 @@ interface HoroscopeData {
 }
 
 export function SidebarHoroscopeSlider({ className }: { className?: string }) {
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
     const { t, language } = useLanguageStore();
     const [horoscopes, setHoroscopes] = useState<Record<string, string>>({});
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -24,7 +25,7 @@ export function SidebarHoroscopeSlider({ className }: { className?: string }) {
         const fetchAllHoroscopes = async () => {
             try {
                 const langQuery = language === 'hi' ? '?lang=hi' : '';
-                const response = await axios.get(`${import.meta.env.VITE_API_URL}/astrology/horoscope/all${langQuery}`);
+                const response = await axios.get(`${apiBaseUrl}/astrology/horoscope/all${langQuery}`);
                 if (response.data && response.data.success) {
                     setHoroscopes(response.data.data); // Assuming data is an object like { "Aries": "...", "Taurus": "..." }
                 }

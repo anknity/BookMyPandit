@@ -10,6 +10,7 @@ interface NumerologyData {
 }
 
 export function NumerologyWidget({ className }: { className?: string }) {
+    const apiBaseUrl = import.meta.env.VITE_API_URL || 'https://bookmypandit-backend.onrender.com/api';
     const { t } = useLanguageStore();
     const [name, setName] = useState('');
     const [dob, setDob] = useState('');
@@ -27,7 +28,7 @@ export function NumerologyWidget({ className }: { className?: string }) {
 
         setLoading(true);
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_URL}/astrology/numerology`, { name, dob });
+            const response = await axios.post(`${apiBaseUrl}/astrology/numerology`, { name, dob });
             if (response.data.success) {
                 setData(response.data.data);
             }

@@ -73,7 +73,7 @@ export function AIChatbot() {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div className="fixed bottom-24 md:bottom-6 right-6 z-[60] flex flex-col items-end">
             {/* Chat Window */}
             <div className={cn(
                 "bg-white w-[350px] max-w-[calc(100vw-3rem)] rounded-2xl shadow-2xl border border-slate-200 overflow-hidden transition-all duration-300 transform origin-bottom-right mb-4 flex flex-col",

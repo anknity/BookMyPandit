@@ -29,8 +29,7 @@ import { AIChatbot } from '@/components/AIChatbot';
 // Auth Pages
 import { useAuthStore } from '@/store/authStore';
 import { useFCMToken } from '@/hooks/useFCMToken';
-import { Login } from '@/pages/public/Login';
-import { Register } from '@/pages/public/Register';
+import { AuthPage } from '@/pages/public/AuthPage';
 
 // User Pages
 import { BookingHistory } from '@/pages/user/BookingHistory';
@@ -58,7 +57,7 @@ import { ReportsManagement } from '@/pages/admin/ReportsManagement';
 import { AdminBannerEditor } from '@/pages/admin/AdminBannerEditor';
 
 function App() {
-  const { setLoading, setUser } = useAuthStore();
+  const { user, setLoading, setUser } = useAuthStore();
   const [isFirebaseLoading, setIsFirebaseLoading] = useState(true);
   useFCMToken(); // Start FCM listen loop automatically if logged in
 
@@ -97,8 +96,8 @@ function App() {
     <>
       <Routes>
         {/* Public Auth Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<AuthPage />} />
 
         {/* Main Public Flow (with Top Navbar & Unified Styles) */}
         <Route element={<MainLayout />}>
@@ -147,7 +146,7 @@ function App() {
           <Route path="banner" element={<AdminBannerEditor />} />
         </Route>
       </Routes>
-      <AIChatbot />
+      {user && <AIChatbot />}
     </>
   );
 }

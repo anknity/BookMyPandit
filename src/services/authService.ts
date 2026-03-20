@@ -16,20 +16,21 @@ export async function loginWithEmail(email: string, password: string) {
     return syncWithBackend(result.user);
 }
 
-export async function registerWithEmail(email: string, password: string, name: string, role: string = 'user') {
+export async function registerWithEmail(email: string, password: string, name: string, role: string = 'user', phone: string = '') {
     const result = await createUserWithEmailAndPassword(firebaseAuth, email, password);
     const { data } = await api.post('/auth/register', {
         firebase_uid: result.user.uid,
         email: result.user.email,
         name,
         role,
+        phone,
     });
     return data.user;
 }
 
-export async function loginWithGoogle() {
+export async function loginWithGoogle(role: string = 'user') {
     const result = await signInWithPopup(firebaseAuth, googleProvider);
-    return syncWithBackend(result.user);
+    return syncWithBackend(result.user, role);
 }
 
 export async function sendPhoneOTP(phone: string, containerId: string = 'recaptcha-container'): Promise<ConfirmationResult> {
@@ -42,13 +43,14 @@ export async function verifyPhoneOTP(confirmationResult: ConfirmationResult, otp
     return syncWithBackend(result.user);
 }
 
-async function syncWithBackend(firebaseUser: FirebaseUser) {
+async function syncWithBackend(firebaseUser: FirebaseUser, role: string = 'user') {
     const { data } = await api.post('/auth/login', {
         firebase_uid: firebaseUser.uid,
         email: firebaseUser.email,
         name: firebaseUser.displayName || '',
         phone: firebaseUser.phoneNumber || '',
         avatar_url: firebaseUser.photoURL || '',
+        role,
     });
     return data.user;
 }

@@ -62,37 +62,41 @@ export function SidebarCalendar() {
         <div className="flex flex-col gap-4">
             <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm mb-4">
                 {/* Header */}
-                <div className="flex justify-between items-center mb-4 px-1">
-                    <button onClick={prevMonth} className="text-slate-400 hover:text-slate-800 transition-colors">
-                        <span className="material-symbols-outlined text-sm font-bold">chevron_left</span>
+                <div className="flex justify-between items-center mb-6 px-2">
+                    <button onClick={prevMonth} className="text-[#8492A6] hover:text-slate-800 transition-colors p-1">
+                        <span className="material-symbols-outlined text-[20px] font-bold">chevron_left</span>
                     </button>
-                    <h3 className="font-bold text-slate-800">{format(currentDate, 'MMMM yyyy')}</h3>
-                    <button onClick={nextMonth} className="text-slate-400 hover:text-slate-800 transition-colors">
-                        <span className="material-symbols-outlined text-sm font-bold">chevron_right</span>
+                    <h3 className="text-lg font-bold text-[#1E293B] font-display">{format(currentDate, 'MMMM yyyy')}</h3>
+                    <button onClick={nextMonth} className="text-[#8492A6] hover:text-slate-800 transition-colors p-1">
+                        <span className="material-symbols-outlined text-[20px] font-bold">chevron_right</span>
                     </button>
                 </div>
 
                 {/* Days of week */}
-                <div className="grid grid-cols-7 mb-2">
+                <div className="grid grid-cols-7 mb-4">
                     {weekDays.map((day, i) => (
-                        <div key={i} className="text-center text-xs font-medium text-slate-400 py-1">
+                        <div key={i} className="text-center text-[13px] font-bold text-[#94A3B8] uppercase tracking-wide">
                             {day}
                         </div>
                     ))}
                 </div>
 
                 {/* Grid */}
-                <div className="grid grid-cols-7 gap-y-1">
+                <div className="grid grid-cols-7 gap-y-4">
                     {days.map((day, i) => {
                         const isSelected = hasEvent(day);
                         const isCurrentMonth = isSameMonth(day, monthStart);
+                        const isTodayDate = isToday(day);
 
                         return (
-                            <div key={i} className="flex justify-center py-1">
+                            <div key={i} className="flex justify-center items-center">
                                 <div className={`
-                                    w-8 h-8 flex items-center justify-center rounded-full text-sm font-medium cursor-pointer transition-all
-                                    ${!isCurrentMonth ? 'text-slate-300' : 'text-slate-700'}
-                                    ${isSelected ? 'bg-[#F98E2E] text-white shadow-md shadow-orange-200 font-bold' : 'hover:bg-slate-50'}
+                                    w-10 h-10 flex items-center justify-center rounded-full text-[15px] cursor-pointer transition-all box-border
+                                    ${!isCurrentMonth ? 'text-[#CBD5E1] font-medium' : ''}
+                                    ${isCurrentMonth && isSelected && !isTodayDate ? 'bg-[#F97316] text-white shadow-[0_4px_10px_rgba(249,115,22,0.3)] font-bold' : ''}
+                                    ${isCurrentMonth && !isSelected && !isTodayDate ? 'text-[#334155] font-medium hover:bg-slate-50' : ''}
+                                    ${isCurrentMonth && isTodayDate && !isSelected ? 'border-2 border-[#F97316] text-[#F97316] font-bold bg-orange-50' : ''}
+                                    ${isCurrentMonth && isTodayDate && isSelected ? 'bg-[#F97316] text-white font-bold ring-2 ring-offset-2 ring-[#F97316]' : ''}
                                 `}>
                                     {format(day, dateFormat)}
                                 </div>

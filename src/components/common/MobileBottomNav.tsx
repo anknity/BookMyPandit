@@ -41,19 +41,19 @@ export function MobileBottomNav() {
                             key={item.path}
                             to={item.path}
                             className={cn(
-                                "flex flex-col items-center justify-center w-16 gap-1 transition-all duration-300",
+                                "flex flex-col items-center justify-center w-16 gap-1 transition-colors duration-200 active:scale-95 touch-manipulation",
                                 isActive ? "text-[#F98E2E]" : "text-slate-400 hover:text-slate-600"
                             )}
                         >
                             <div
                                 className={cn(
-                                    "flex items-center justify-center w-12 h-8 rounded-full transition-all duration-300",
+                                    "flex items-center justify-center w-12 h-8 rounded-full transition-colors duration-200",
                                     isActive ? "bg-orange-50" : "bg-transparent"
                                 )}
                             >
                                 <span
                                     className={cn(
-                                        "material-symbols-outlined text-2xl transition-transform duration-300",
+                                        "material-symbols-outlined text-2xl transition-transform duration-200",
                                         isActive ? "filled scale-110" : "scale-100"
                                     )}
                                 >
@@ -61,7 +61,7 @@ export function MobileBottomNav() {
                                 </span>
                             </div>
                             <span className={cn(
-                                "text-[10px] font-bold transition-all duration-300 tracking-wide",
+                                "text-[10px] font-bold transition-colors duration-200 tracking-wide",
                                 isActive ? "font-black" : "font-semibold"
                             )}>
                                 {item.label}

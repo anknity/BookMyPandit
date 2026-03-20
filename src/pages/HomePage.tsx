@@ -6,6 +6,7 @@ import { BookingCard } from '@/components/user/BookingCard';
 import { SidebarCalendar } from '@/components/user/SidebarCalendar';
 import { TrendingPujas } from '@/components/home/TrendingPujas';
 import { SacredDestinations } from '@/components/home/SacredDestinations';
+import { PujaScroller } from '@/components/home/PujaScroller';
 import { SidebarHoroscopeSlider } from '@/components/SidebarHoroscopeSlider';
 import api from '@/config/api';
 import { listPandits } from '@/services/panditService';
@@ -119,7 +120,7 @@ export function HomePage() {
   }, []);
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto pt-6 pb-6 px-4 md:px-6 flex flex-col-reverse lg:flex-row gap-6">
+    <div className="w-full max-w-[1600px] mx-auto pt-2 pb-6 px-4 md:px-6 flex flex-col-reverse lg:flex-row gap-6 mt-2">
       {/* Sidebar */}
       <aside className="lg:w-[320px] shrink-0 gap-6 flex flex-col lg:sticky lg:top-6 pb-10 lg:pb-0 h-max">
         <SidebarCalendar />
@@ -172,17 +173,17 @@ export function HomePage() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col gap-8 pb-20 w-full min-w-0">
+      <div className="flex-1 flex flex-col gap-4 pb-20 w-full min-w-0">
         {/* Hero Banner */}
-        <section className="relative w-full h-auto min-h-[300px] md:min-h-[360px] rounded-[2rem] overflow-hidden group shrink-0 shadow-xl shadow-orange-900/10">
+        <section className="relative w-full h-auto min-h-[160px] md:min-h-[220px] rounded-[2rem] overflow-hidden group shrink-0 shadow-xl shadow-orange-900/10">
           <div
             className="absolute inset-0 bg-cover bg-[center_top_20%] transition-transform duration-1000 scale-105 group-hover:scale-100"
             style={{ backgroundImage: `url("${banner.bg_image_url}")` }}
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent md:bg-gradient-to-r md:from-black/80 md:via-black/30 md:to-transparent" />
-          <div className="relative h-full p-6 md:p-12 flex flex-col justify-center items-start z-10 w-full max-w-[90%] md:max-w-xl">
+          <div className="relative h-full p-4 md:p-6 lg:p-10 flex flex-col justify-center items-start z-10 w-full max-w-[95%] md:max-w-xl">
             <div>
-              <div className="flex flex-wrap items-center gap-2 mb-3">
+              <div className="flex flex-wrap items-center gap-2 mb-2">
                 {banner.badge_text && (
                   <span className="px-2.5 py-1 rounded-full bg-primary text-white text-[10px] md:text-xs font-bold uppercase tracking-wider shadow-md">
                     {banner.badge_text}
@@ -194,37 +195,39 @@ export function HomePage() {
                   </span>
                 )}
               </div>
-              <h2 className="text-3xl md:text-5xl lg:text-[54px] font-extrabold text-white leading-[1.1] mb-3 md:mb-5 tracking-tight font-display">
+              <h2 className="text-2xl md:text-4xl lg:text-[42px] font-extrabold text-white leading-[1.1] mb-2 md:mb-4 tracking-tight font-display">
                 {banner.title_line1} <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-pink-500">
                   {banner.title_line2}
                 </span>
               </h2>
-              <div className="bg-white/10 p-3 md:p-4 rounded-xl backdrop-blur-md border border-white/10 mb-5 md:mb-8 shadow-sm">
-                <p className="text-white/95 text-xs md:text-base font-medium leading-relaxed">
+              <div className="bg-white/10 p-2 md:p-3 rounded-xl backdrop-blur-md border border-white/10 mb-4 md:mb-6 shadow-sm line-clamp-2 md:line-clamp-none">
+                <p className="text-white/95 text-xs md:text-sm font-medium leading-relaxed">
                   {banner.description}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-wrap gap-2 md:gap-3">
                 <Link
                   to={banner.book_puja_id ? `/pujas/${banner.book_puja_id}` : '/pujas'}
-                  className="bg-primary hover:bg-orange-600 text-white shadow-lg shadow-orange-900/20 px-5 md:px-8 py-2.5 md:py-3.5 font-bold rounded-full transition-transform active:scale-95 flex items-center gap-2 text-sm md:text-base">
-                  <span className="material-symbols-outlined text-lg md:text-xl">book_online</span>
+                  className="bg-primary hover:bg-orange-600 text-white shadow-lg shadow-orange-900/20 px-4 md:px-6 py-2 md:py-3 font-bold rounded-full transition-transform active:scale-95 flex items-center gap-1.5 md:gap-2 text-xs md:text-sm">
+                  <span className="material-symbols-outlined text-base md:text-lg">book_online</span>
                   Book Puja
                 </Link>
                 <Link
                   to={banner.view_details_puja_id ? `/pujas/${banner.view_details_puja_id}` : '/pujas'}
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 md:px-8 py-3.5 font-bold rounded-full transition-colors flex items-center gap-2 text-sm md:text-base backdrop-blur-sm">
+                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-5 md:px-6 py-2 md:py-3 font-bold rounded-full transition-colors flex items-center gap-1.5 md:gap-2 text-xs md:text-sm backdrop-blur-sm">
                   View Details
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                  <span className="material-symbols-outlined text-xs md:text-sm">arrow_forward</span>
                 </Link>
               </div>
             </div>
           </div>
         </section>
 
+        <PujaScroller />
+
         {/* Trending Pujas */}
-        <section>
+        <section className="mt-2">
           <div className="flex items-end justify-between mb-6 px-2">
             <div>
               <h3 className="text-2xl font-bold text-slate-900 font-display">Trending Pujas</h3>

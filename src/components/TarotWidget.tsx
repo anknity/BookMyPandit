@@ -11,6 +11,54 @@ interface TarotData {
     image: string;
 }
 
+const POSITION_THEME: Record<string, { icon: string; accent: string; glow: string; pattern: string }> = {
+    past: {
+        icon: 'history',
+        accent: 'text-amber-300',
+        glow: 'shadow-amber-500/30',
+        pattern: 'from-slate-700 via-slate-800 to-slate-900',
+    },
+    present: {
+        icon: 'sunny',
+        accent: 'text-yellow-300',
+        glow: 'shadow-yellow-500/30',
+        pattern: 'from-indigo-800 via-slate-800 to-slate-900',
+    },
+    future: {
+        icon: 'rocket_launch',
+        accent: 'text-orange-300',
+        glow: 'shadow-orange-500/30',
+        pattern: 'from-slate-800 via-indigo-900 to-slate-900',
+    },
+};
+
+function getPositionTheme(position: string) {
+    const key = position.toLowerCase();
+    return POSITION_THEME[key] || {
+        icon: 'auto_awesome',
+        accent: 'text-amber-300',
+        glow: 'shadow-amber-500/30',
+        pattern: 'from-slate-700 via-slate-800 to-slate-900',
+    };
+}
+
+function getCardSuitTheme(cardTitle: string) {
+    const title = cardTitle.toLowerCase();
+    if (title.includes('swords')) {
+        return { icon: 'swords', tone: 'text-amber-700', chip: 'bg-amber-100 border-amber-300', label: 'Swords' };
+    }
+    if (title.includes('cups')) {
+        return { icon: 'local_bar', tone: 'text-yellow-700', chip: 'bg-yellow-100 border-yellow-300', label: 'Cups' };
+    }
+    if (title.includes('wands')) {
+        return { icon: 'local_fire_department', tone: 'text-orange-700', chip: 'bg-orange-100 border-orange-300', label: 'Wands' };
+    }
+    if (title.includes('pentacles')) {
+        return { icon: 'toll', tone: 'text-amber-700', chip: 'bg-amber-50 border-amber-300', label: 'Pentacles' };
+    }
+    return { icon: 'auto_awesome', tone: 'text-amber-700', chip: 'bg-amber-50 border-amber-300', label: 'Arcana' };
+}
+
 export function TarotWidget({ className }: { className?: string }) {
     const { t } = useLanguageStore();
     const [cardData, setCardData] = useState<TarotData[]>([]);
@@ -58,6 +106,8 @@ export function TarotWidget({ className }: { className?: string }) {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
                         {cardData.map((data, idx) => {
                             const isFlipped = !!flippedCards[idx];
+                            const theme = getPositionTheme(data.position);
+                            const suitTheme = getCardSuitTheme(data.card);
                             return (
                                 <div key={idx} className="flex flex-col items-center">
                                     <h4 className="text-amber-400/80 font-bold uppercase tracking-widest text-xs mb-4">{data.position}</h4>
@@ -67,9 +117,12 @@ export function TarotWidget({ className }: { className?: string }) {
                                     >
                                         <div className={cn("w-full h-full transition-transform duration-700 transform-style-3d", isFlipped && "rotate-y-180")}>
                                             {/* Front of Card (Face Down) */}
-                                            <div className="absolute w-full h-full backface-hidden bg-slate-800 border-2 border-amber-400/30 rounded-xl flex items-center justify-center p-2 shadow-lg group-hover:shadow-amber-400/20 group-hover:border-amber-400/50 transition-all">
-                                                <div className="w-full h-full border border-amber-400/20 rounded-lg bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-slate-700 to-slate-800 flex items-center justify-center">
-                                                    <span className="material-symbols-outlined text-4xl text-amber-400/50">auto_awesome</span>
+                                            <div className={cn("absolute w-full h-full backface-hidden border-2 border-amber-400/30 rounded-xl flex items-center justify-center p-2 shadow-lg transition-all", theme.glow, "group-hover:border-amber-300/70 group-hover:shadow-2xl")}>
+                                                <div className={cn("w-full h-full border border-amber-400/20 rounded-lg bg-gradient-to-br flex items-center justify-center relative overflow-hidden", theme.pattern)}>
+                                                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(251,191,36,0.18),transparent_60%)]" />
+                                                    <span className={cn("material-symbols-outlined text-4xl relative z-10", theme.accent)}>{theme.icon}</span>
+                                                    <span className="material-symbols-outlined text-lg text-amber-200/50 absolute top-3 left-3">auto_awesome</span>
+                                                    <span className="material-symbols-outlined text-base text-amber-200/40 absolute bottom-3 right-3">stars</span>
                                                 </div>
                                                 {!isFlipped && (
                                                     <div className="absolute -bottom-3 bg-amber-400 text-slate-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider animate-bounce">
@@ -81,7 +134,18 @@ export function TarotWidget({ className }: { className?: string }) {
                                             {/* Back of Card (Face Up) */}
                                             <div className="absolute w-full h-full backface-hidden rotate-y-180 bg-white border-2 border-slate-200 rounded-xl overflow-hidden shadow-lg flex flex-col">
                                                 <div className="p-2 border-b border-slate-100 flex-1 flex flex-col relative items-center justify-center bg-slate-50">
-                                                    <img src={data.image} alt={data.card} className="w-16 h-16 opacity-80" />
+                                                    <div className={cn("absolute top-2 left-2 px-2 py-1 rounded-full border text-[9px] font-black tracking-wider uppercase flex items-center gap-1", suitTheme.chip, suitTheme.tone)}>
+                                                        <span className="material-symbols-outlined text-[12px]">{suitTheme.icon}</span>
+                                                        {suitTheme.label}
+                                                    </div>
+                                                    {data.image ? (
+                                                        <img src={data.image} alt={data.card} className="w-16 h-16 opacity-80" />
+                                                    ) : (
+                                                        <div className="w-16 h-16 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center">
+                                                            <span className={cn("material-symbols-outlined text-3xl", suitTheme.tone)}>{suitTheme.icon}</span>
+                                                        </div>
+                                                    )}
+                                                    <span className="absolute top-2 right-2 text-[9px] font-black text-amber-600/80 uppercase tracking-wider">{data.position}</span>
                                                 </div>
                                                 <div className="py-2 px-1 text-center bg-white flex items-center justify-center">
                                                     <p className="text-[10px] sm:text-xs font-black text-slate-800 uppercase tracking-tighter truncate px-1" title={data.card}>{data.card}</p>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
 import { Puja } from '@/types';
 import { PujaCard } from '@/components/user/PujaCard';
@@ -49,15 +49,19 @@ export default function PujaListing() {
         }
     };
 
-    const filteredPujas = pujas.filter(puja => {
-        const matchesCategory = activeCategory === 'All' || puja.category === activeCategory;
-        const matchesSearch = (language === 'hi' && puja.name_hi
-            ? puja.name_hi.toLowerCase().includes(searchQuery.toLowerCase())
-            : puja.name.toLowerCase().includes(searchQuery.toLowerCase()))
-            || puja.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const normalizedSearch = searchQuery.trim().toLowerCase();
 
-        return matchesCategory && matchesSearch;
-    });
+    const filteredPujas = useMemo(() => {
+        return pujas.filter((puja) => {
+            const matchesCategory = activeCategory === 'All' || puja.category === activeCategory;
+            const localizedName = language === 'hi' && puja.name_hi ? puja.name_hi : puja.name;
+            const matchesSearch = normalizedSearch.length === 0
+                || localizedName.toLowerCase().includes(normalizedSearch)
+                || puja.description.toLowerCase().includes(normalizedSearch);
+
+            return matchesCategory && matchesSearch;
+        });
+    }, [pujas, activeCategory, language, normalizedSearch]);
 
     return (
         <div className="h-full w-full max-w-[1600px] mx-auto pt-10 pb-12">

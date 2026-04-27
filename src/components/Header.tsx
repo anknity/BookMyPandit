@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useLanguageStore } from '@/store/languageStore';
@@ -10,8 +10,17 @@ import { NotificationBell } from '@/components/common/NotificationBell';
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { language, toggleLanguage } = useLanguageStore();
   const { user, isAuthenticated, logout } = useAuthStore();
   const isAdmin = location.pathname.startsWith('/admin');
+
+  const navItems = [
+    { label: 'Home', to: '/' },
+    { label: 'Pujas', to: '/pujas' },
+    { label: 'Pandits', to: '/pandits' },
+    { label: 'Astrology', to: '/astrology' },
+    { label: 'About', to: '/about' },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -61,23 +70,33 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           {!isAdmin && (
-            <nav className="hidden lg:flex items-center gap-6 mr-4">
-              <Link to="/" className="text-sm font-semibold text-primary transition-colors">Home</Link>
-              <Link to="/pujas" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Pujas</Link>
-              <Link to="/pandits" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Pandits</Link>
-              <Link to="/astrology" className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Astrology</Link>
+            <nav className="hidden lg:flex items-center gap-2 mr-4 bg-white/60 border border-slate-200/70 rounded-full px-2 py-1.5">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className={({ isActive }) => cn(
+                    "px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border",
+                    isActive
+                      ? "text-primary bg-orange-50 border-orange-200 shadow-sm"
+                      : "text-slate-600 bg-transparent border-transparent hover:bg-slate-100 hover:text-slate-900"
+                  )}
+                >
+                  {item.label}
+                </NavLink>
+              ))}
             </nav>
           )}
 
           {/* Language Toggle */}
           <button
-            onClick={useLanguageStore((state) => state.toggleLanguage)}
+            onClick={toggleLanguage}
             className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 transition-all text-sm font-bold text-slate-700 border border-slate-200"
             title="Switch Language"
           >
-            <span className={cn(useLanguageStore((state) => state.language) === 'en' ? "text-primary" : "text-slate-400")}>EN</span>
+            <span className={cn(language === 'en' ? "text-primary" : "text-slate-400")}>EN</span>
             <span className="text-slate-300">|</span>
-            <span className={cn(useLanguageStore((state) => state.language) === 'hi' ? "text-primary" : "text-slate-400")}>HI</span>
+            <span className={cn(language === 'hi' ? "text-primary" : "text-slate-400")}>HI</span>
           </button>
 
           <NotificationBell />

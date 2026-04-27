@@ -1,15 +1,9 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguageStore } from '@/store/languageStore';
 import { ZODIAC_SIGNS } from './HoroscopeWidget';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 import api from '@/config/api';
-
-interface HoroscopeData {
-    sign: string;
-    date: string;
-    horoscope_data: string;
-}
 
 export function SidebarHoroscopeSlider({ className }: { className?: string }) {
     const { t, language } = useLanguageStore();
@@ -47,7 +41,7 @@ export function SidebarHoroscopeSlider({ className }: { className?: string }) {
         }, 5000); // Change every 5 seconds
 
         return () => clearInterval(interval);
-    }, [loading, horoscopes, currentIndex, isPaused]);
+    }, [loading, horoscopes, isPaused]);
 
     const currentSign = ZODIAC_SIGNS[currentIndex];
     // Use fallback if api fails temporarily

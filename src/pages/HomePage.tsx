@@ -10,6 +10,7 @@ import { PujaScroller } from '@/components/home/PujaScroller';
 import { SidebarHoroscopeSlider } from '@/components/SidebarHoroscopeSlider';
 import api from '@/config/api';
 import { listPandits } from '@/services/panditService';
+import { Puja } from '@/types';
 
 interface Muhurat {
   name: string;
@@ -38,6 +39,57 @@ interface PanditData {
   pandit_services?: any[];
 }
 
+interface HeroSlide {
+  id: string;
+  name: string;
+  description: string;
+  image_url: string;
+  category: string;
+  duration: string;
+  base_price: number;
+}
+
+const DEFAULT_HERO_IMAGE = 'https://images.unsplash.com/photo-1519817914152-22f90e684d79?q=80&w=1600&auto=format&fit=crop';
+
+const HERO_CATEGORY_FALLBACKS: Array<{ match: RegExp; image: string }> = [
+  {
+    match: /(graha|shanti|dosh|nivaran|havan|homa|mangal|kaal sarp)/i,
+    image: 'https://images.unsplash.com/photo-1604608672516-f1b62b2a0d89?q=80&w=1600&auto=format&fit=crop',
+  },
+  {
+    match: /(satyanarayan|vishnu|narayan|lakshmi|ganesh)/i,
+    image: 'https://images.unsplash.com/photo-1627829025849-c18f8f5f6f18?q=80&w=1600&auto=format&fit=crop',
+  },
+  {
+    match: /(rudra|shiv|mahadev|abhishek)/i,
+    image: 'https://images.unsplash.com/photo-1616048056617-93b94a339009?q=80&w=1600&auto=format&fit=crop',
+  },
+  {
+    match: /(sanskar|vivah|marriage|griha|pravesh|namkaran|mundan|annaprashan)/i,
+    image: 'https://images.unsplash.com/photo-1630476062636-08d9f093f9fd?q=80&w=1600&auto=format&fit=crop',
+  },
+  {
+    match: /(shraddh|pitra|daan|charity)/i,
+    image: 'https://images.unsplash.com/photo-1567591414240-e9c1ff8e1718?q=80&w=1600&auto=format&fit=crop',
+  },
+];
+
+function resolveSlideImage(puja: Puja) {
+  if (puja.image_url && puja.image_url.trim().length > 0) return puja.image_url;
+  const haystack = `${puja.name} ${puja.category}`;
+  const matched = HERO_CATEGORY_FALLBACKS.find((entry) => entry.match.test(haystack));
+  return matched?.image || DEFAULT_HERO_IMAGE;
+}
+
+function shuffleArray<T>(arr: T[]) {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 export function HomePage() {
   const { user } = useAuthStore();
   const [muhurats, setMuhurats] = useState<Muhurat[]>([]);
@@ -46,41 +98,76 @@ export function HomePage() {
   const [pandits, setPandits] = useState<PanditData[]>([]);
   const [panditsLoading, setPanditsLoading] = useState(true);
 
-  // Banner state
-  interface BannerConfig {
-    badge_text: string;
-    date_text: string;
-    title_line1: string;
-    title_line2: string;
-    description: string;
-    bg_image_url: string;
-    book_puja_id: string | null;
-    view_details_puja_id: string | null;
-    is_active: boolean;
-  }
-  const DEFAULT_BANNER: BannerConfig = {
-    badge_text: 'Holi Special',
-    date_text: 'March 25th',
-    title_line1: 'Celebrate',
-    title_line2: 'Colors of Holi',
-    description: 'Embrace the festival of colors with divine blessings. Book special Holika Dahan puja and verified pandits for your home.',
-    bg_image_url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCL5T5SWVPYZ-SmfuH0MjYBMB7AYVz2PflZ4loCj8AIPG6PlR2mcbiKhketR-gqKJokihZG304D7HksisaoG2y88MBDR7CK6oUXreHimwh2GgbTV4L3pcC7Zzvdq_MMejqiKBQj0y0kDEEtp8jaNQLzWDuLRMNYd90JU_P2m6nBNLMDvZAD26VujUqSb67e4y5NLY9zOeogrzhK9cPIE8tdYr2dPoypzYm38ElPC63Zz5_F87RXk9ZyFPljiTgToQK-a0ufr786Biw',
-    book_puja_id: null,
-    view_details_puja_id: null,
-    is_active: true,
-  };
-  const [banner, setBanner] = useState<BannerConfig>(DEFAULT_BANNER);
+  const [heroSlides, setHeroSlides] = useState<HeroSlide[]>([]);
+  const [activeSlide, setActiveSlide] = useState(0);
 
-  // Fetch banner
+  const whyPanditsCards = [
+    {
+      title: 'Reliable Vedic Experts',
+      description: 'Faithful, experienced, and certified pandits for authentic rituals.',
+      icon: 'calendar_month',
+      iconWrap: 'bg-amber-500 text-white',
+      cardTone: 'bg-[#f3ece2] border-amber-200',
+      titleTone: 'text-amber-600',
+      edgeShadow: 'shadow-[6px_6px_0_rgba(217,119,6,0.95)]',
+    },
+    {
+      title: 'Free Consultation & Booking',
+      description: 'Free and quick guidance with easy booking process.',
+      icon: 'support_agent',
+      iconWrap: 'bg-emerald-500 text-white',
+      cardTone: 'bg-[#d9f0e1] border-emerald-200',
+      titleTone: 'text-emerald-600',
+      edgeShadow: 'shadow-[6px_6px_0_rgba(22,163,74,0.95)]',
+    },
+    {
+      title: 'Worldwide Services',
+      description: 'In-person or virtual puja options available worldwide.',
+      icon: 'groups',
+      iconWrap: 'bg-indigo-500 text-white',
+      cardTone: 'bg-[#dfe5f1] border-indigo-200',
+      titleTone: 'text-indigo-600',
+      edgeShadow: 'shadow-[6px_6px_0_rgba(67,56,202,0.95)]',
+    },
+  ];
+
+  // Fetch randomized puja slides for hero carousel
   useEffect(() => {
-    api.get('/banner')
-      .then(res => {
-        if (res.data?.banner?.is_active !== false) {
-          setBanner({ ...DEFAULT_BANNER, ...res.data.banner });
-        }
+    api.get('/pujas')
+      .then((res) => {
+        const pujas: Puja[] = res.data?.pujas || [];
+        const activePujas = pujas.filter((p) => p.is_active !== false);
+        const shuffled = shuffleArray(activePujas);
+        const targetCount = shuffled.length >= 10 ? 10 : shuffled.length;
+        const selected = shuffled.slice(0, targetCount).map((puja) => ({
+          id: puja.id,
+          name: puja.name,
+          description: puja.description,
+          image_url: resolveSlideImage(puja),
+          category: puja.category,
+          duration: puja.duration,
+          base_price: Number(puja.base_price) || 0,
+        }));
+        setHeroSlides(selected);
       })
-      .catch(() => { });
+      .catch(() => {
+        setHeroSlides([]);
+      });
   }, []);
+
+  useEffect(() => {
+    if (heroSlides.length <= 1) return;
+    const timer = window.setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [heroSlides]);
+
+  useEffect(() => {
+    if (activeSlide >= heroSlides.length && heroSlides.length > 0) {
+      setActiveSlide(0);
+    }
+  }, [activeSlide, heroSlides.length]);
 
   // Fetch real stats when user is logged in
   useEffect(() => {
@@ -174,54 +261,129 @@ export function HomePage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col gap-4 pb-20 w-full min-w-0">
-        {/* Hero Banner */}
-        <section className="relative w-full h-auto min-h-[160px] md:min-h-[220px] rounded-[2rem] overflow-hidden group shrink-0 shadow-xl shadow-orange-900/10">
-          <div
-            className="absolute inset-0 bg-cover bg-[center_top_20%] transition-transform duration-1000 scale-105 group-hover:scale-100"
-            style={{ backgroundImage: `url("${banner.bg_image_url}")` }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent md:bg-gradient-to-r md:from-black/80 md:via-black/30 md:to-transparent" />
-          <div className="relative h-full p-4 md:p-6 lg:p-10 flex flex-col justify-center items-start z-10 w-full max-w-[95%] md:max-w-xl">
-            <div>
-              <div className="flex flex-wrap items-center gap-2 mb-2">
-                {banner.badge_text && (
-                  <span className="px-2.5 py-1 rounded-full bg-primary text-white text-[10px] md:text-xs font-bold uppercase tracking-wider shadow-md">
-                    {banner.badge_text}
-                  </span>
+        {/* Hero Slider */}
+        <section className="relative w-full min-h-[260px] md:min-h-[340px] rounded-[2rem] overflow-hidden shrink-0 shadow-xl shadow-orange-900/10">
+          {heroSlides.length > 0 ? heroSlides.map((slide, index) => {
+            const isActive = index === activeSlide;
+            return (
+              <article
+                key={slide.id}
+                className={cn(
+                  "absolute inset-0 transition-opacity duration-700",
+                  isActive ? "opacity-100" : "opacity-0 pointer-events-none"
                 )}
-                {banner.date_text && (
-                  <span className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] md:text-xs font-bold backdrop-blur-md border border-white/20 shadow-sm">
-                    {banner.date_text}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url("${slide.image_url}")` }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/60 to-black/30 md:from-black/75 md:via-black/45 md:to-transparent" />
+
+                <div className="relative z-10 h-full p-4 md:p-8 lg:p-10 flex flex-col justify-center items-start max-w-3xl">
+                  <div className="flex flex-wrap items-center gap-2 mb-3">
+                    <span className="px-2.5 py-1 rounded-full bg-primary text-white text-[10px] md:text-xs font-bold uppercase tracking-wider shadow-md">
+                      {slide.category}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] md:text-xs font-bold backdrop-blur-md border border-white/20 shadow-sm">
+                      {slide.duration}
+                    </span>
+                  </div>
+
+                  <h2 className="text-3xl md:text-5xl font-black text-white leading-tight mb-3 tracking-tight font-display max-w-2xl">
+                    {slide.name}
+                  </h2>
+
+                  <p className="text-white/90 text-sm md:text-base font-medium leading-relaxed line-clamp-2 md:line-clamp-3 max-w-2xl mb-5">
+                    {slide.description}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <Link
+                      to={`/pujas/${slide.id}`}
+                      className="bg-primary hover:bg-orange-600 text-white shadow-lg shadow-orange-900/20 px-5 md:px-7 py-2.5 md:py-3.5 font-bold rounded-full transition-transform active:scale-95 flex items-center gap-2 text-sm"
+                    >
+                      <span className="material-symbols-outlined text-base">shopping_bag</span>
+                      Book Now
+                    </Link>
+                    <Link
+                      to={`/pujas/${slide.id}`}
+                      className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-5 md:px-6 py-2.5 md:py-3 font-bold rounded-full transition-colors flex items-center gap-2 text-sm backdrop-blur-sm"
+                    >
+                      View Details
+                      <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                    </Link>
+                    <span className="text-white text-sm font-bold px-3 py-1.5 rounded-full bg-black/25 border border-white/15">
+                      From Rs. {slide.base_price.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+              </article>
+            );
+          }) : (
+            <article className="absolute inset-0">
+              <div
+                className="absolute inset-0 bg-cover bg-center"
+                style={{ backgroundImage: `url("${DEFAULT_HERO_IMAGE}")` }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent md:from-black/80 md:via-black/30 md:to-transparent" />
+              <div className="relative h-full p-4 md:p-6 lg:p-10 flex flex-col justify-center items-start z-10 w-full max-w-[95%] md:max-w-xl">
+                <h2 className="text-2xl md:text-4xl lg:text-[42px] font-extrabold text-white leading-[1.1] mb-2 md:mb-4 tracking-tight font-display">
+                  Discover Divine <br />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-pink-500">
+                    Puja Experiences
                   </span>
-                )}
-              </div>
-              <h2 className="text-2xl md:text-4xl lg:text-[42px] font-extrabold text-white leading-[1.1] mb-2 md:mb-4 tracking-tight font-display">
-                {banner.title_line1} <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-pink-500">
-                  {banner.title_line2}
-                </span>
-              </h2>
-              <div className="bg-white/10 p-2 md:p-3 rounded-xl backdrop-blur-md border border-white/10 mb-4 md:mb-6 shadow-sm line-clamp-2 md:line-clamp-none">
-                <p className="text-white/95 text-xs md:text-sm font-medium leading-relaxed">
-                  {banner.description}
-                </p>
-              </div>
-              <div className="flex flex-wrap gap-2 md:gap-3">
+                </h2>
+                <div className="bg-white/10 p-2 md:p-3 rounded-xl backdrop-blur-md border border-white/10 mb-4 md:mb-6 shadow-sm line-clamp-2 md:line-clamp-none">
+                  <p className="text-white/95 text-xs md:text-sm font-medium leading-relaxed">
+                    Handpicked rituals with verified pandits. Choose the right puja for your family and book instantly.
+                  </p>
+                </div>
                 <Link
-                  to={banner.book_puja_id ? `/pujas/${banner.book_puja_id}` : '/pujas'}
-                  className="bg-primary hover:bg-orange-600 text-white shadow-lg shadow-orange-900/20 px-4 md:px-6 py-2 md:py-3 font-bold rounded-full transition-transform active:scale-95 flex items-center gap-1.5 md:gap-2 text-xs md:text-sm">
+                  to="/pujas"
+                  className="bg-primary hover:bg-orange-600 text-white shadow-lg shadow-orange-900/20 px-4 md:px-6 py-2 md:py-3 font-bold rounded-full transition-transform active:scale-95 flex items-center gap-1.5 md:gap-2 text-xs md:text-sm"
+                >
                   <span className="material-symbols-outlined text-base md:text-lg">book_online</span>
                   Book Puja
                 </Link>
-                <Link
-                  to={banner.view_details_puja_id ? `/pujas/${banner.view_details_puja_id}` : '/pujas'}
-                  className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-5 md:px-6 py-2 md:py-3 font-bold rounded-full transition-colors flex items-center gap-1.5 md:gap-2 text-xs md:text-sm backdrop-blur-sm">
-                  View Details
-                  <span className="material-symbols-outlined text-xs md:text-sm">arrow_forward</span>
-                </Link>
               </div>
-            </div>
-          </div>
+            </article>
+          )}
+
+          {heroSlides.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => setActiveSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
+                className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/35 hover:bg-black/55 text-white border border-white/20 transition-colors flex items-center justify-center"
+                aria-label="Previous slide"
+              >
+                <span className="material-symbols-outlined">chevron_left</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSlide((prev) => (prev + 1) % heroSlides.length)}
+                className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/35 hover:bg-black/55 text-white border border-white/20 transition-colors flex items-center justify-center"
+                aria-label="Next slide"
+              >
+                <span className="material-symbols-outlined">chevron_right</span>
+              </button>
+
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+                {heroSlides.map((slide, index) => (
+                  <button
+                    key={slide.id}
+                    type="button"
+                    onClick={() => setActiveSlide(index)}
+                    className={cn(
+                      "h-2 rounded-full transition-all duration-300",
+                      index === activeSlide ? "w-8 bg-primary" : "w-2 bg-white/60 hover:bg-white"
+                    )}
+                    aria-label={`Go to slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </section>
 
         <PujaScroller />
@@ -325,6 +487,45 @@ export function HomePage() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* Why BookMyPandit */}
+        <section className="bg-white rounded-[2rem] border border-slate-200/80 p-6 md:p-8 shadow-sm mt-2">
+          <div className="max-w-4xl">
+            <h3 className="text-2xl md:text-4xl font-black text-[#a32020] tracking-tight font-display">
+              Why BookMyPandit
+            </h3>
+            <p className="text-slate-700 text-base md:text-lg leading-snug mt-3 max-w-3xl">
+              We avail trusted and expert pandits for Hindu rituals online or at your home under budget.
+            </p>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-5">
+            {whyPanditsCards.map((card) => (
+              <article
+                key={card.title}
+                className={cn(
+                  'rounded-[1.6rem] border px-4 md:px-5 py-5 transition-transform duration-300 hover:-translate-y-1',
+                  card.cardTone,
+                  card.edgeShadow
+                )}
+              >
+                <div className="flex flex-col items-start gap-3">
+                  <div className={cn('w-10 h-10 md:w-11 md:h-11 rounded-full flex items-center justify-center shadow-sm shrink-0', card.iconWrap)}>
+                    <span className="material-symbols-outlined text-xl">{card.icon}</span>
+                  </div>
+                  <div>
+                    <h4 className={cn('text-xl md:text-2xl font-black leading-tight font-display', card.titleTone)}>
+                      {card.title}
+                    </h4>
+                    <p className="text-slate-800 text-base md:text-lg leading-snug mt-2">
+                      {card.description}
+                    </p>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </section>
       </div>
     </div>
